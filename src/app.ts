@@ -20,30 +20,23 @@ function getDateKey(date: Date): string {
 const temperatureData: Record<string, Record<string, TemperatureReading[]>> = {}
 
 export function processReadings(readings: TemperatureReading[]): void {
-  readings.forEach((reading) => {
+  for (const reading of readings) {
     const dateKey = getDateKey(reading.time)
     const city = reading.city
 
-    if (!temperatureData[dateKey]) {
-      temperatureData[dateKey] = {}
-    }
+    const cityData = (temperatureData[dateKey] ??= {})
+    const cityReadings = (cityData[city] ??= [])
 
-    if (!temperatureData[dateKey][city]) {
-      temperatureData[dateKey][city] = []
-    }
-
-    const cityReadings = temperatureData[dateKey][city]
-    const insertIndex = cityReadings.findIndex(
-      (existingReading) =>
-        existingReading.time.getTime() > reading.time.getTime(),
+    const index = cityReadings.findIndex(
+      (r) => r.time.getTime() > reading.time.getTime(),
     )
 
-    if (insertIndex === -1) {
+    if (index === -1) {
       cityReadings.push(reading)
     } else {
-      cityReadings.splice(insertIndex, 0, reading)
+      cityReadings.splice(index, 0, reading)
     }
-  })
+  }
 }
 
 export function getTemperatureSummary(
